@@ -1,0 +1,56 @@
+FUNCTION zfmm_spr_supplier_pending.
+*"----------------------------------------------------------------------
+*"*"Interface local:
+*"  IMPORTING
+*"     REFERENCE(I_WERKS) TYPE  WERKS_D
+*"     REFERENCE(I_LIFNR) TYPE  LIFNR
+*"  EXPORTING
+*"     VALUE(E_BASE64) TYPE  STRING
+*"  EXCEPTIONS
+*"      ACTION_STOPPED
+*"----------------------------------------------------------------------
+
+  DATA: lt_t001w            TYPE y_t_t001w,
+        lt_ardc             TYPE y_t_adrc,
+        lt_j_1bbranch       TYPE y_t_j_1bbranch,
+        lt_adr6             TYPE y_t_adr6,
+        lt_lfa1             TYPE y_t_lfa1,
+        lw_supplier_pending TYPE zstmm_spr_supplier_pending,
+        l_fm_name           TYPE rs38l_fnam,
+        lt_itcoo            TYPE y_t_itcoo.
+
+  PERFORM zf_read_t001w_by_werks USING i_werks
+                              CHANGING lt_t001w.
+
+  PERFORM zf_read_adrc_by_t001w USING lt_t001w
+                             CHANGING lt_ardc.
+
+  PERFORM zf_read_1bbranch_by_t001w USING lt_t001w
+                                 CHANGING lt_j_1bbranch.
+
+  PERFORM zf_read_adr6_by_t001w USING lt_t001w
+                             CHANGING lt_adr6.
+
+  PERFORM zf_read_lfa1_by_lifnr USING i_lifnr
+                               CHANGING lt_lfa1.
+
+  PERFORM zf_fill_data_enterprise USING lt_t001w
+                                        lt_ardc
+                                        lt_j_1bbranch
+                                        lt_adr6
+                                        lt_lfa1
+                                        i_lifnr
+                                        i_return_data
+                               CHANGING lw_supplier_pending.
+
+  IF lw_supplier_pending IS INITIAL. RAISE action_stopped.  ENDIF. 
+
+  PERFORM zf_conv_sfname_to_fmname USING c_sf-supplier_pending
+                                 CHANGING l_fm_name.
+  IF l_fm_name IS INITIAL. RAISE action_stopped. ENDIF.
+
+  PERFORM zf_call_smartform USING l_fm_name
+                                  lw_supplier_pending
+                         CHANGING lt_itcoo
+                                  e_base64.
+ENDFUNCTION.

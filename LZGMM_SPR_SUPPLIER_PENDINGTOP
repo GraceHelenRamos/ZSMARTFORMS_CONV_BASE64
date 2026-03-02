@@ -1,0 +1,54 @@
+FUNCTION-POOL zgmm_spr_supplier_pending.    "MESSAGE-ID ..
+
+TYPES: BEGIN OF y_t001w,
+         werks      TYPE t001w-werks,
+         bwkey      TYPE t001w-bwkey,
+         j_1bbranch TYPE t001w-j_1bbranch,
+         bukrs      TYPE t001k-bukrs,
+         adrnr      TYPE t001-adrnr,
+
+*         butxt TYPE t001-butxt,
+*         ort01 TYPE T001-ort01,
+
+       END OF y_t001w,
+       y_t_t001w TYPE STANDARD TABLE OF y_t001w,
+
+       BEGIN OF y_adrc,
+         addrnumber TYPE adrc-addrnumber,
+         name1      TYPE adrc-name1,
+         city1      TYPE adrc-city1,
+         post_code1 TYPE adrc-post_code1,
+         mc_street  TYPE adrc-mc_street,
+       END OF y_adrc,
+       y_t_adrc TYPE STANDARD TABLE OF y_adrc,
+
+       BEGIN OF y_j_1bbranch,
+         bukrs  TYPE j_1bbranch-bukrs,
+         branch TYPE j_1bbranch-branch,
+         stcd1  TYPE j_1bbranch-stcd1,
+       END OF y_j_1bbranch,
+       y_t_j_1bbranch TYPE STANDARD TABLE OF y_j_1bbranch,
+
+       BEGIN OF y_adr6,
+         addrnumber TYPE adr6-addrnumber,
+         smtp_addr  TYPE adr6-smtp_addr,
+       END OF y_adr6,
+       y_t_adr6 TYPE STANDARD TABLE OF y_adr6,
+
+       BEGIN OF y_lfa1,
+         lifnr     TYPE lfa1-lifnr,
+         adrnr     TYPE lfa1-adrnr,
+         stcd1     TYPE lfa1-stcd1,
+         stcd3     TYPE lfa1-stcd3,
+         name1     TYPE lfa1-name1,
+         ort01     TYPE lfa1-ort01,
+         stras     TYPE lfa1-stras,
+         pstlz     TYPE lfa1-pstlz,
+         smtp_addr TYPE adr6-smtp_addr,
+       END OF y_lfa1,
+       y_t_lfa1  TYPE STANDARD TABLE OF y_lfa1,
+       y_t_itcoo TYPE STANDARD TABLE OF itcoo.
+
+CONSTANTS: BEGIN OF c_sf,
+             supplier_pending TYPE tdsfname VALUE 'ZSFMM_SPR_SUPPLIER_PENDING',
+           END OF c_sf.

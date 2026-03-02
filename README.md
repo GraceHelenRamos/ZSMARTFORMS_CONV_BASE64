@@ -15,3 +15,5 @@ Crie tabelas para capos dinâmicos, a posisão do campo será conforme vc declar
 Tabelas ficam na janela Main, para cada smarforms o correto é uma main.
 
 <img width="1354" height="764" alt="image" src="https://github.com/user-attachments/assets/5bf7c963-5036-4c7f-b37d-5a11a68fda44" />
+
+Para cada tabela criada vc precisa criar a work area dela para conseguir puxar os campos para o seu smartforms, a work area terá o mesmo tipo da estrutura criada detro da categoria de tabela.

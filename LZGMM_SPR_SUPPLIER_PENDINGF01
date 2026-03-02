@@ -1,0 +1,260 @@
+*----------------------------------------------------------------------*
+***INCLUDE LZGMM_SPR_SUPPLIER_PENDINGF01.
+*----------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Form zf_read_t001w_by_werks
+*&---------------------------------------------------------------------*
+FORM zf_read_t001w_by_werks USING pw_werks TYPE werks_d
+                         CHANGING pt_t001w TYPE y_t_t001w.
+
+  CLEAR: pt_t001w.
+
+  SELECT werks
+         t001w~bwkey
+         j_1bbranch
+         t001k~bukrs
+         t001~adrnr
+    INTO TABLE pt_t001w
+    FROM t001w
+    INNER JOIN t001k ON t001k~bwkey EQ t001w~bwkey
+    INNER JOIN t001   ON t001~bukrs EQ t001k~bukrs
+    WHERE werks EQ pw_werks.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_read_adrc_by_t001w
+*&---------------------------------------------------------------------*
+FORM zf_read_adrc_by_t001w USING pt_t001w TYPE y_t_t001w
+                        CHANGING pt_ardc  TYPE y_t_adrc.
+  CLEAR: pt_ardc.
+  IF pt_t001w IS INITIAL. RETURN.ENDIF.
+
+  SELECT addrnumber name1  city1 post_code1 mc_street
+  FROM adrc
+    INTO TABLE pt_ardc
+    FOR ALL ENTRIES IN pt_t001w
+    WHERE addrnumber EQ pt_t001w-adrnr.
+
+  SORT pt_ardc BY addrnumber.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_read_1bbranch_by_t001w
+*&---------------------------------------------------------------------*
+FORM zf_read_1bbranch_by_t001w USING pt_t001w    TYPE y_t_t001w
+                            CHANGING pt_1bbranch TYPE y_t_j_1bbranch.
+
+  CLEAR: pt_1bbranch.
+  IF pt_t001w IS INITIAL. RETURN.ENDIF.
+
+  SELECT bukrs branch stcd1
+  FROM j_1bbranch
+    INTO TABLE pt_1bbranch
+    FOR ALL ENTRIES IN pt_t001w
+    WHERE bukrs EQ pt_t001w-bukrs
+      AND branch EQ pt_t001w-j_1bbranch.
+
+  SORT pt_1bbranch BY bukrs branch.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_fill_data_enterprise
+*&---------------------------------------------------------------------*
+FORM zf_fill_data_enterprise  USING pt_t001w            TYPE y_t_t001w
+                                    pt_ardc             TYPE y_t_adrc
+                                    pt_bbranch          TYPE y_t_j_1bbranch
+                                    pt_adr6             TYPE y_t_adr6
+                                    pt_lfa1             TYPE y_t_lfa1
+                                    pw_lifnr            TYPE lifnr
+                                    pt_return_data      TYPE zctmm_spr_return_data_supplier
+                           CHANGING pw_supplier_pending TYPE zstmm_spr_supplier_pending.
+
+  DATA: lw_return_data LIKE LINE OF pt_return_data.
+  CLEAR: pw_supplier_pending.
+
+  LOOP AT pt_t001w ASSIGNING FIELD-SYMBOL(<fs_t001w>).
+
+    pw_supplier_pending-werks                 = <fs_t001w>-werks.
+
+    READ TABLE pt_ardc ASSIGNING FIELD-SYMBOL(<fs_adrc>) WITH KEY addrnumber = <fs_t001w>-adrnr
+                                                          BINARY SEARCH.
+    IF sy-subrc IS INITIAL.
+      pw_supplier_pending-addrnumber_manuf      = <fs_adrc>-addrnumber.
+      pw_supplier_pending-city_manuf            = <fs_adrc>-city1.
+      pw_supplier_pending-city_code_manuf       = <fs_adrc>-post_code1.
+      pw_supplier_pending-name1_manuf = <fs_adrc>-name1.
+      pw_supplier_pending-street_manuf = <fs_adrc>-mc_street.
+    ENDIF.
+
+    READ TABLE pt_bbranch ASSIGNING FIELD-SYMBOL(<fs_bbranch>) WITH KEY bukrs = <fs_t001w>-bukrs
+                                                                        branch = <fs_t001w>-j_1bbranch
+                                                                BINARY SEARCH.
+    IF sy-subrc IS INITIAL.
+      pw_supplier_pending-cnpj_manuf            =  <fs_bbranch>-stcd1.
+    ENDIF.
+
+    READ TABLE pt_adr6 ASSIGNING FIELD-SYMBOL(<fs_adr6>) WITH KEY addrnumber = <fs_t001w>-adrnr
+                                                         BINARY SEARCH.
+    IF sy-subrc IS INITIAL.
+      pw_supplier_pending-email_manuf           = <fs_adr6>-smtp_addr.
+    ENDIF.
+
+    READ TABLE pt_lfa1 ASSIGNING FIELD-SYMBOL(<fs_lfa1>) WITH KEY lifnr = pw_lifnr
+                                                         BINARY SEARCH.
+    IF sy-subrc IS INITIAL.
+
+      pw_supplier_pending-lifnr          = <fs_lfa1>-lifnr.
+      pw_supplier_pending-name_spl       = <fs_lfa1>-name1.
+      pw_supplier_pending-ort01_spl      = <fs_lfa1>-ort01.
+      pw_supplier_pending-adrnr_spl      = <fs_lfa1>-adrnr.
+      pw_supplier_pending-pstlz_spl      = <fs_lfa1>-pstlz.
+      pw_supplier_pending-stcd3_spl      = <fs_lfa1>-stcd1.
+      pw_supplier_pending-stcd1_spl      = <fs_lfa1>-stcd3.
+      pw_supplier_pending-email_spl      = <fs_lfa1>-smtp_addr.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_read_adr6_by_t001w
+*&---------------------------------------------------------------------*
+FORM zf_read_adr6_by_t001w USING pt_t001w TYPE y_t_t001w
+                        CHANGING pt_adr6  TYPE y_t_adr6.
+
+  CLEAR:pt_adr6.
+  IF pt_t001w IS INITIAL. RETURN. ENDIF.
+
+  SELECT addrnumber
+         smtp_addr
+  FROM adr6
+    INTO TABLE pt_adr6
+    FOR ALL ENTRIES IN pt_t001w
+    WHERE addrnumber EQ pt_t001w-adrnr.
+
+  SORT  pt_adr6 BY  addrnumber.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_read_lfa1_by_lifnr
+*&---------------------------------------------------------------------*
+FORM zf_read_lfa1_by_lifnr USING pw_lifnr TYPE lifnr
+                        CHANGING pt_lfa1  TYPE y_t_lfa1.
+
+  CLEAR: pt_lfa1.
+
+  SELECT lifnr  adrnr  stcd1
+         stcd3  name1  ort01
+         stras pstlz smtp_addr
+    INTO TABLE pt_lfa1
+    FROM lfa1
+   INNER JOIN adr6 ON adr6~addrnumber EQ lfa1~adrnr
+                   AND adr6~flgdefault = 'X'
+    WHERE lifnr EQ pw_lifnr.
+
+  SORT pt_lfa1 BY lifnr.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  ZF_CONV_SFNAME_TO_FMNAME
+*&---------------------------------------------------------------------*
+FORM zf_conv_sfname_to_fmname  USING p_sfname TYPE tdsfname
+                            CHANGING p_fmname TYPE rs38l_fnam.
+
+  CLEAR: p_fmname.
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      formname           = p_sfname
+    IMPORTING
+      fm_name            = p_fmname
+    EXCEPTIONS
+      no_form            = 1
+      no_function_module = 2
+      OTHERS             = 3.
+  IF sy-subrc IS NOT INITIAL. RETURN. ENDIF.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  ZF_CALL_SMARTFORM
+*&---------------------------------------------------------------------*
+FORM zf_call_smartform  USING p_fmname            TYPE rs38l_fnam
+                              pw_supplier_pending TYPE zstmm_spr_supplier_pending
+                      CHANGING pt_itcoo           TYPE y_t_itcoo
+                               pv_base64          TYPE string.
+
+  DATA: lw_output_options     TYPE ssfcompop,
+        lw_control_parameters TYPE ssfctrlop,
+        lw_job_info           TYPE ssfcrescl,
+        lt_otf                TYPE STANDARD TABLE OF itcoo,
+        lv_xstring_pdf  TYPE xstring.
+
+  CLEAR:pt_itcoo, lw_output_options, lw_control_parameters, lw_job_info, lv_xstring_pdf.
+
+  lw_output_options-tddest   = 'LOCL'.
+  lw_output_options-tdnewid  = abap_true.
+  lw_output_options-tdimmed  = abap_true.
+  lw_output_options-tddelete = abap_true.
+
+  lw_control_parameters-getotf    = abap_true.
+  lw_control_parameters-no_dialog = abap_true.
+  lw_control_parameters-preview   = abap_false.
+
+  CALL FUNCTION p_fmname
+    EXPORTING
+      control_parameters = lw_control_parameters
+      output_options     = lw_output_options
+      user_settings      = abap_false
+      i_supplier_peding  = pw_supplier_pending
+    IMPORTING
+      job_output_info    = lw_job_info
+    EXCEPTIONS
+      formatting_error   = 1
+      internal_error     = 2
+      send_error         = 3
+      user_canceled      = 4
+      OTHERS             = 5.
+  IF sy-subrc IS NOT INITIAL. RETURN. ENDIF.
+
+  pt_itcoo = lw_job_info-otfdata.
+  IF pt_itcoo IS INITIAL. RETURN. ENDIF.
+
+  PERFORM zf_convert_otf USING pt_itcoo
+                      CHANGING lv_xstring_pdf.
+
+  PERFORM zf_call_scms_base64_encode_str USING lv_xstring_pdf
+                                       CHANGING pv_base64.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_call_scms_base64_encode_str
+*&---------------------------------------------------------------------*
+FORM zf_call_scms_base64_encode_str USING pv_xstring_pdf TYPE xstring
+                                 CHANGING pv_base64      TYPE string.
+  CLEAR:pv_base64.
+  CALL FUNCTION 'SCMS_BASE64_ENCODE_STR'
+    EXPORTING
+      input  = pv_xstring_pdf
+    IMPORTING
+      output = pv_base64.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form zf_CONVERT_OTF
+*&---------------------------------------------------------------------*
+FORM zf_convert_otf USING pt_otf         TYPE y_t_itcoo
+                 CHANGING pv_xstring_pdf TYPE xstring.
+
+  DATA: lv_bin_filesize TYPE i,
+        lt_pdf_bin      TYPE STANDARD TABLE OF tline.
+
+   CALL FUNCTION 'CONVERT_OTF'
+    EXPORTING
+      format       = 'PDF'
+    IMPORTING
+      bin_filesize = lv_bin_filesize
+      bin_file     = pv_xstring_pdf
+    TABLES
+      otf          = pt_otf
+      lines        = lt_pdf_bin
+    EXCEPTIONS
+      OTHERS       = 1.
+  IF sy-subrc <> 0 OR pt_otf IS INITIAL.
+    RETURN.
+  ENDIF.
+
+ENDFORM.

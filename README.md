@@ -12,7 +12,7 @@ Para a criação do smartforms, você precisará criar uma estrutura com campos 
 
 Crie tabelas para campos dinâmicos, a posição do campo será conforme você declarar cada campo.
 
-Tabelas ficam na janela Main, para cada smarforms o correto é uma main.
+Tabelas ficam na janela Main, para cada smartforms o correto é uma main.
 
 <img width="1354" height="764" alt="image" src="https://github.com/user-attachments/assets/5bf7c963-5036-4c7f-b37d-5a11a68fda44" />
 

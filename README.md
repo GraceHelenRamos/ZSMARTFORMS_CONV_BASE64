@@ -5,5 +5,13 @@ Para a criação do smartforms vocÊ precisará criar uma estrutura com campos f
       Campos dinâmicos = Campos que podem vir mais de uma informação ex: itens.
 <img width="1351" height="704" alt="image" src="https://github.com/user-attachments/assets/e929549e-a0e2-4721-a4e3-100358928e8b" />
  Crie padrões para campos fixos, pense em suas posições como um jogo de batalha naval 
+ 
        Informe linha e coluna
+       
  <img width="1288" height="827" alt="image" src="https://github.com/user-attachments/assets/dcc462b5-eed9-4a90-8b61-cfc53fc893b9" />
+
+Crie tabelas para capos dinâmicos, a posisão do campo será conforme vc declarar cada campos
+
+Tabelas ficam na janela Main, para cada smarforms o correto é uma main.
+
+<img width="1354" height="764" alt="image" src="https://github.com/user-attachments/assets/5bf7c963-5036-4c7f-b37d-5a11a68fda44" />

@@ -18,7 +18,7 @@ Tabelas ficam na janela Main, para cada smartforms o correto é uma main.
 
 Para cada tabela criada, você precisa criar a work area dela para conseguir puxar os campos para o seu smartforms. A work area terá o mesmo tipo da estrutura criada dentro da categoria de tabela.
 
-Para passar pegar as informações da tabela, crie um campo de texto e nele coloque sua work area - campo desejado 
+Para pegar as informações da tabela, crie um campo de texto e nele coloque sua work area - campo desejado 
 
 <img width="465" height="157" alt="image" src="https://github.com/user-attachments/assets/b9fb432b-6f8e-4623-acdd-1a0f92d5ed0f" />
 
